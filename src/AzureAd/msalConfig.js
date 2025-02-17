@@ -4,7 +4,7 @@ const MSAL_CONFIG = {
     auth: {
         clientId: "eebd07a2-842b-4ec4-8c5f-a6edceb0d746",
         authority: "https://login.microsoftonline.com/Terracloud2.onmicrosoft.com",
-        redirectUri: "http://localhost:3000",
+        redirectUri: "https://13.52.246.199/",
     },
     cache: {
         cacheLocation: "localStorage",

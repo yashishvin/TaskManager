@@ -32,7 +32,7 @@ function Tasks() {
                 const userRoles = rolesResponse.data.value.map(role => role.displayName);
                 setIsAdmin(userRoles.includes("Global Administrator"));
 
-                const response = await axios.get('http://localhost:5001/tasks');
+                const response = await axios.get('https://13.52.246.199:5001/tasks');
                 setTasks(response.data);
             } catch (error) {
                 console.error("Error fetching tasks:", error);
@@ -68,7 +68,7 @@ function Tasks() {
     const handleSubmitTask = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5001/tasks', newTask);
+            const response = await axios.post('https://13.52.246.199:5001/tasks', newTask);
             setTasks(prevTasks => [response.data, ...prevTasks]);
             handleCloseModal();
         } catch (error) {
@@ -78,7 +78,7 @@ function Tasks() {
 
     const handleDeleteTask = async (taskId) => {
         try {
-            await axios.delete(`http://localhost:5001/tasks/${taskId}`);
+            await axios.delete(`https://13.52.246.199:5001/tasks/${taskId}`);
             setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
         } catch (error) {
             console.error("Error deleting task:", error);

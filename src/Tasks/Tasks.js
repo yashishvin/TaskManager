@@ -22,19 +22,16 @@ function Tasks() {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                // Acquire Token Silently
                 const tokenResponse = await PUBLIC_CLIENT_APPLICATION.acquireTokenSilent(LOGIN_REQUEST);
                 const accessToken = tokenResponse.accessToken;
                 setToken(accessToken);
 
-                // Fetch User Roles from Microsoft Graph API
                 const rolesResponse = await axios.get("https://graph.microsoft.com/v1.0/me/memberOf", {
                     headers: { Authorization: `Bearer ${accessToken}` },
                 });
                 const userRoles = rolesResponse.data.value.map(role => role.displayName);
                 setIsAdmin(userRoles.includes("Global Administrator"));
 
-                // Fetch Tasks from Backend
                 const response = await axios.get('http://localhost:5001/tasks');
                 setTasks(response.data);
             } catch (error) {
@@ -82,7 +79,7 @@ function Tasks() {
     const handleDeleteTask = async (taskId) => {
         try {
             await axios.delete(`http://localhost:5001/tasks/${taskId}`);
-            setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId)); // Remove task from UI
+            setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
         } catch (error) {
             console.error("Error deleting task:", error);
         }
@@ -92,63 +89,21 @@ function Tasks() {
         PUBLIC_CLIENT_APPLICATION.logout();
     };
 
-    const TaskCard = ({ task }) => (
-        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-            <div className="d-flex justify-content-between align-items-start">
-                <div>
-                    <h3 className="h5 mb-2">{task.name}</h3>
-                    <p className="text-muted mb-0">{task.description}</p>
-                </div>
-                <div className="text-end">
-                    <p className="text-muted small d-flex align-items-center justify-content-end">
-                        <BsClock className="me-1" />
-                        {new Date(task.createdAt).toLocaleDateString()}
-                    </p>
-                    <p className="text-muted small mt-1">
-                        Assignee: {task.assignee}
-                    </p>
-                    {isAdmin && (
-                        <Button 
-                            variant="danger" 
-                            size="sm" 
-                            className="mt-2 d-flex align-items-center"
-                            onClick={() => handleDeleteTask(task._id)}
-                        >
-                            <BsTrash className="me-2" /> Delete
-                        </Button>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-
     if (loading) {
         return <div className="text-center p-4">Loading...</div>;
     }
 
     return (
         <div className="min-vh-100 bg-light">
+            {/* Navbar */}
             <Navbar bg="dark" variant="dark" className="mb-4">
                 <div className="container d-flex justify-content-between align-items-center">
-                    <Navbar.Brand>
+                    <div style={{ width: "33%" }}></div>
+                    <Navbar.Brand className="mx-auto">
                         {isAdmin ? "Admin Task Manager" : "Task Manager"}
                     </Navbar.Brand>
-                    <div className="d-flex align-items-center">
-                        {isAdmin && (
-                            <Button 
-                                variant="primary"
-                                onClick={handleCreateTask}
-                                className="d-flex align-items-center me-3"
-                            >
-                                <BsPlus className="me-2" size={20} />
-                                Create Task
-                            </Button>
-                        )}
-                        <Button 
-                            variant="outline-light"
-                            onClick={handleSignOut}
-                            className="d-flex align-items-center"
-                        >
+                    <div className="d-flex align-items-center" style={{ width: "33%", justifyContent: "flex-end" }}>
+                        <Button variant="outline-light" onClick={handleSignOut} className="d-flex align-items-center">
                             <BsBoxArrowRight className="me-2" size={16} />
                             Logout
                         </Button>
@@ -156,6 +111,22 @@ function Tasks() {
                 </div>
             </Navbar>
 
+            {/* Task Inbox Header */}
+            <div className="container d-flex justify-content-between align-items-center mb-3">
+                <h3 className="mb-0">Task Inbox</h3>
+                {isAdmin && (
+                    <Button 
+                        variant="primary"
+                        onClick={handleCreateTask}
+                        className="d-flex align-items-center"
+                    >
+                        <BsPlus className="me-2" size={20} />
+                        Add Task
+                    </Button>
+                )}
+            </div>
+
+            {/* Task List */}
             <div className="container">
                 {tasks.length === 0 ? (
                     <div className="text-center py-4 text-muted">
@@ -164,7 +135,33 @@ function Tasks() {
                 ) : (
                     <div>
                         {tasks.map((task) => (
-                            <TaskCard key={task._id} task={task} />
+                            <div key={task._id} className="bg-white rounded-lg shadow-md p-4 mb-4">
+                                <div className="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h3 className="h5 mb-2">{task.name}</h3>
+                                        <p className="text-muted mb-0">{task.description}</p>
+                                    </div>
+                                    <div className="d-flex flex-column align-items-end">
+                                        <p className="text-muted small d-flex align-items-center">
+                                            <BsClock className="me-1" />
+                                            {new Date(task.createdAt).toLocaleDateString()}
+                                        </p>
+                                        <p className="text-muted small mt-1">
+                                            Assignee: {task.assignee}
+                                        </p>
+                                        {isAdmin && (
+                                            <Button 
+                                                variant="danger" 
+                                                size="sm" 
+                                                className="mt-2"
+                                                onClick={() => handleDeleteTask(task._id)}
+                                            >
+                                                <BsTrash className="me-2" /> Delete
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 )}
